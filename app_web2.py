@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, Response
 import cv2
 import numpy as np
-from yolo_prediction import YOLO_Pred
+from yolo_pred import YOLO_Pred
 
 app = Flask(__name__)
 
