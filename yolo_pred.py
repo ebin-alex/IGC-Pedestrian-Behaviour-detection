@@ -5,6 +5,7 @@ import os
 import yaml
 from yaml.loader import SafeLoader
 from math import sqrt
+import Jetson.GPIO as GPIO
 
 class YOLO_Pred:
     def __init__(self, onnx_model, data_yaml):
@@ -61,6 +62,16 @@ class YOLO_Pred:
         return colors
 
     def predictions(self, image):
+        GPIO.setmode(GPIO.BOARD)
+        
+        self.red_led = 12
+        self.yellow_led = 7
+        self.green_led = 11
+        
+        GPIO.setup(self.red_led, GPIO.OUT)
+        GPIO.setup(self.yellow_led, GPIO.OUT)
+        GPIO.setup(self.green_led, GPIO.OUT)
+
         row, col, d = image.shape
         max_rc = max(row, col)
         input_image = np.zeros((max_rc, max_rc, 3), dtype=np.uint8)
@@ -137,6 +148,10 @@ class YOLO_Pred:
         closest_warning = ""  # Initialize closest_warning here
         colors = self.generate_colors()
 
+        red_detected = False
+        yellow_detected = False
+        green_detected = False
+
         for i, ind in enumerate(index):
             x, y, w, h = boxes_np[ind]
             bb_conf = int(confidences_np[ind] * 100)
@@ -188,11 +203,13 @@ class YOLO_Pred:
                     # Change the color of the bounding box to red
                     cv2.rectangle(image, (x, y), (x + w, y + h), (255, 0, 0), 2)
                     cv2.rectangle(image, (x, y - 30), (x + w, y), (255, 0, 0), -1)
+                    red_detected = True
                 elif distances[i] > 7 and distances[i] <= 10:
                     # Change the color of the bounding box to yellow
                     cv2.rectangle(image, (x, y), (x + w, y + h), (255, 165, 0), 2)
                     cv2.rectangle(image, (x, y - 30), (x + w, y), (255, 165, 0), -1)
                     closest_warning = f"Careful!"
+                    yellow_detected = True
                 else:
                     # No warning message for safe distances
                     closest_warning = "Looks safe, keep moving"
@@ -201,6 +218,7 @@ class YOLO_Pred:
                     # Change the color of the bounding box to green
                     cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
                     cv2.rectangle(image, (x, y - 30), (x + w, y), (0, 255, 0), -1)
+                    green_detected = True
         # Draw the "Looks safe, keep moving" or other warning text
         text_x = 10  # Adjust the X-coordinate as needed
         text_y = 30  # Adjust the Y-coordinate as needed
@@ -208,6 +226,20 @@ class YOLO_Pred:
 
         # Convert the image to BGR format for saving
         img_pred = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+
+        if red_detected:
+            GPIO.output(self.red_led, GPIO.HIGH)
+            GPIO.output(self.yellow_led, GPIO.LOW)
+            GPIO.output(self.green_led, GPIO.LOW)
+        elif yellow_detected:
+            GPIO.output(self.red_led, GPIO.LOW)
+            GPIO.output(self.yellow_led, GPIO.HIGH)
+            GPIO.output(self.green_led, GPIO.LOW)
+        else:
+            GPIO.output(self.red_led, GPIO.LOW)
+            GPIO.output(self.yellow_led, GPIO.LOW)
+            GPIO.output(self.green_led, GPIO.HIGH)
+
 
         return img_pred, closest_warning
     
