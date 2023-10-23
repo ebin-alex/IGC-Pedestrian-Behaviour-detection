@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>YOLO Object Detection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh; /* Set the container to the full viewport height */
+        }
+    </style>
+
+</head>
+<body>
+    <h1 align='center'>Pedestrian Behavior Detection System</h1>
+    <div class="image-container">
+        <img src="{{ url_for('video') }}" alt="Live Video Feed">
+    </div>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>YOLO Object Detection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .image-container {
+            display: flex;
+            align-items: center;
+        }
+        .image-container img {
+            margin: 10px;
+        }
+        .original-image-container img,
+        .detected-image-container img {
+            max-width: 80%;
+            height: auto;
+        }
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .green-text {
+            color: green;
+        }
+        .red-text {
+            color: red;
+        }
+        .status-item {
+            display: flex;
+            align-items: center;
+        }
+        .status-rect {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+            background-color: transparent;
+        }
+        .status-label {
+            font-size: 18px;
+        }
+        .red {
+            background-color: red;
+        }
+        .green {
+            background-color: green;
+        }
+        .orange {
+            background-color: orange;
+        }
+        .right-corner {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1 align='center'>Pedestrian Behavior Detection System</h1>
+    <div class="form-container">
+        <form method="POST" action="/" enctype="multipart/form-data">
+            <input type="file" name="image" style="margin-bottom: 10px;">
+            <input type="submit" value="Detect Objects">
+        </form>
+    </div>
+    {% if output_image and input_image %}
+        <div class="right-corner">
+            <div class="status-item">
+                <div class="status-rect red"></div>
+                <div class="status-label">Danger</div>
+            </div>
+            <div class="status-item">
+                <div class="status-rect green"></div>
+                <div class="status-label">Safe</div>
+            </div>
+            <div class="status-item">
+                <div class="status-rect orange"></div>
+                <div class="status-label">Careful</div>
+            </div>
+        </div>
+        <h2>Detection Result: {% if closest_warning %}
+            <h2 class="{% if 'person' not in closest_warning %}green-text{% else %}red-text{% endif %}">
+                {{ closest_warning }}
+            </h2>
+            {% endif %}</h2>
+        
+        <div class="image-container">
+            <div class="original-image-container">
+                <h3>Original Image</h3>
+                <img src="{{ input_image }}" alt="Original Image">
+            </div>
+            <div class="detected-image-container">
+                <h3>Detected Image</h3>
+                <img src="{{ output_image }}" alt="Detected Image">
+            </div>
+        </div>
+    {% endif %}
+</body>  
+</html>
