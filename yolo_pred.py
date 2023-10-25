@@ -6,6 +6,7 @@ import yaml
 from yaml.loader import SafeLoader
 from math import sqrt
 import Jetson.GPIO as GPIO
+import time
 
 class YOLO_Pred:
     def __init__(self, onnx_model, data_yaml):
@@ -67,10 +68,14 @@ class YOLO_Pred:
         self.red_led = 12
         self.yellow_led = 7
         self.green_led = 11
+        self.motor = 31
         
         GPIO.setup(self.red_led, GPIO.OUT)
         GPIO.setup(self.yellow_led, GPIO.OUT)
         GPIO.setup(self.green_led, GPIO.OUT)
+        GPIO.setup(self.motor,GPIO.OUT)
+
+        GPIO.output(self.motor, GPIO.LOW)
 
         row, col, d = image.shape
         max_rc = max(row, col)
@@ -231,15 +236,19 @@ class YOLO_Pred:
             GPIO.output(self.red_led, GPIO.HIGH)
             GPIO.output(self.yellow_led, GPIO.LOW)
             GPIO.output(self.green_led, GPIO.LOW)
+            GPIO.output(self.motor, GPIO.LOW)
         elif yellow_detected:
             GPIO.output(self.red_led, GPIO.LOW)
             GPIO.output(self.yellow_led, GPIO.HIGH)
             GPIO.output(self.green_led, GPIO.LOW)
+            GPIO.output(self.motor, GPIO.LOW)
         else:
             GPIO.output(self.red_led, GPIO.LOW)
             GPIO.output(self.yellow_led, GPIO.LOW)
             GPIO.output(self.green_led, GPIO.HIGH)
-
+            GPIO.output(self.motor, GPIO.HIGH)
+            time.sleep(2)  # Delay for 5 seconds
+            GPIO.output(self.motor, GPIO.LOW)
 
         return img_pred, closest_warning
     
